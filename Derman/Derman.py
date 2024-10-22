@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 
 def linearize_vol_surface(surface,s,atm_vols):
-    K = np.array(surface.index).tolist()
-    T = np.array(atm_vols.index).tolist()
-    
+    K = np.array(surface.index)
+    T = np.array(atm_vols.index)
     derman_coefs = pd.Series(np.empty(len(T),dtype=float),index=T)
     for t in T:
         vols = surface.loc[:,t].dropna()
+        k = vols.index
         x = np.array(vols.index)-s
         y = vols - atm_vols.loc[t]
         model = LinearRegression(fit_intercept=False)
@@ -16,18 +17,15 @@ def linearize_vol_surface(surface,s,atm_vols):
         model.fit(x,y)
         b = model.coef_[0]
         derman_coefs.loc[t] = b
-    
-    derman_surface = pd.DataFrame(
-        np.empty((len(K),len(T)),dtype=float),
-        index=K,
-        columns=T
-    )
-    
-    for k in K:
-        moneyness = k-s
-        for t in T:
-            derman_surface.loc[k,t] = atm_vols.loc[t] + moneyness*derman_coefs.loc[t]
-    
-    vol_matrix = derman_surface.copy()
-    return vol_matrix
+        estimated = pd.Series(np.asarray(k-s)*b + atm_vols.loc[t],index=k)
+
+        # plt.figure()
+        # plt.plot(estimated,color='purple', label='estimated')
+        # plt.scatter(vols.index,vols,color = 'green',label='actual')
+        # plt.title(f'{t} day maturity')
+        # plt.ylabel('implied volatility')
+        # plt.xlabel('strike price')
+        # plt.show()
+
+    return derman_coefs
 
