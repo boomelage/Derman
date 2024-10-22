@@ -2,15 +2,13 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-def linearize_vol_surface(surface,s):
-    K = np.array(surface.index)
-    atm_idx = pd.Series(abs(K-s)).sort_values().index.tolist()[0]
-    atm_vols = surface.iloc[atm_idx]
-    T = np.array(surface.columns)
+def linearize_vol_surface(surface,s,atm_vols):
+    K = np.array(surface.index).tolist()
+    T = np.array(atm_vols.index).tolist()
     
     derman_coefs = pd.Series(np.empty(len(T),dtype=float),index=T)
     for t in T:
-        vols = surface.loc[:,t]
+        vols = surface.loc[:,t].dropna()
         x = np.array(vols.index)-s
         y = vols - atm_vols.loc[t]
         model = LinearRegression(fit_intercept=False)
