@@ -3,9 +3,10 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 
-def linearize_vol_surface(surface,s,atm_vols):
+def derman(surface,s):
     K = np.array(surface.index,dtype=float)
-    T = np.array(atm_vols.index,dtype=int)
+    T = np.array(surface.columns,dtype=int)
+    atm_vols = pd.Series(surface.loc[s,:].values,index=T)
     derman_coefs = {}
     for t in T.tolist():
         try:
