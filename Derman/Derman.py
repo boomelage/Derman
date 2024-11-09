@@ -28,6 +28,7 @@ def derman(surface,s):
             # plt.ylabel('implied volatility')
             # plt.xlabel('strike price')
             # plt.show()
+            
         except Exception as e:
             print(f"error for {t}: {e}")
             pass
